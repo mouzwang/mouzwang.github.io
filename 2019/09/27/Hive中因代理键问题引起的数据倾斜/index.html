@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="Hive,">
 
 
 
@@ -79,13 +79,21 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="数据倾斜分析任务运行失败本次ods层的一张表在跑历史数据时出现了数据倾斜的情况。由于小程序被爬了导致数据量是平时的十倍。未经优化的hsql在第一次处理时报了未从excutor拉取到数据失败的错误信息。后来发现这几天的数据量比较大,所以之后尝试增大任务运行内存。再次运行，结果stage_8 还是一直卡着不动,一段时间之后任务依然失败 原因分析出现数据倾斜一般可能会出现的表现有作业经常在reduce阶">
+<meta name="keywords" content="Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive中因代理键问题引起的数据倾斜">
+<meta property="og:url" content="http://yoursite.com/2019/09/27/Hive中因代理键问题引起的数据倾斜/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="数据倾斜分析任务运行失败本次ods层的一张表在跑历史数据时出现了数据倾斜的情况。由于小程序被爬了导致数据量是平时的十倍。未经优化的hsql在第一次处理时报了未从excutor拉取到数据失败的错误信息。后来发现这几天的数据量比较大,所以之后尝试增大任务运行内存。再次运行，结果stage_8 还是一直卡着不动,一段时间之后任务依然失败 原因分析出现数据倾斜一般可能会出现的表现有作业经常在reduce阶">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006y8mN6gy1g7ebji3qkpj31a403swgw.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006y8mN6gy1g7eblihaopj31a80akdnt.jpg">
+<meta property="og:updated_time" content="2019-09-27T11:55:18.032Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="Hive中因代理键问题引起的数据倾斜">
+<meta name="twitter:description" content="数据倾斜分析任务运行失败本次ods层的一张表在跑历史数据时出现了数据倾斜的情况。由于小程序被爬了导致数据量是平时的十倍。未经优化的hsql在第一次处理时报了未从excutor拉取到数据失败的错误信息。后来发现这几天的数据量比较大,所以之后尝试增大任务运行内存。再次运行，结果stage_8 还是一直卡着不动,一段时间之后任务依然失败 原因分析出现数据倾斜一般可能会出现的表现有作业经常在reduce阶">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006y8mN6gy1g7ebji3qkpj31a403swgw.jpg">
 
 
 
@@ -115,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/">
+  <link rel="canonical" href="http://yoursite.com/2019/09/27/Hive中因代理键问题引起的数据倾斜/">
 
 
 
 
 
-  <title>Hexo</title>
+  <title>Hive中因代理键问题引起的数据倾斜 | Hexo</title>
   
 
 
@@ -140,8 +148,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -244,9 +251,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -276,9 +283,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/27/Hive中因代理键问题引起的数据倾斜/" itemprop="url">Hive中因代理键问题引起的数据倾斜</a></h1>
+          <h1 class="post-title" itemprop="name headline">Hive中因代理键问题引起的数据倾斜</h1>
         
 
         <div class="post-meta">
@@ -350,18 +355,25 @@
       
 
       
-        
-          
-          数据倾斜分析任务运行失败本次ods层的一张表在跑历史数据时出现了数据倾斜的情况。由于小程序被爬了导致数据量是平时的十倍。未经优化的hsql在第一次处理时报了未从excutor拉取到数据失败的错误信息。后来发现这几天的数据量比较大,所以之后尝试增大任务运行内存。再次运行，结果stage_8 还是一直卡
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/09/27/Hive中因代理键问题引起的数据倾斜/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+        <h1 id="数据倾斜分析"><a href="#数据倾斜分析" class="headerlink" title="数据倾斜分析"></a>数据倾斜分析</h1><h2 id="任务运行失败"><a href="#任务运行失败" class="headerlink" title="任务运行失败"></a>任务运行失败</h2><p>本次ods层的一张表在跑历史数据时出现了数据倾斜的情况。由于小程序被爬了导致数据量是平时的十倍。未经优化的hsql在第一次处理时报了未从excutor拉取到数据失败的错误信息。后来发现这几天的数据量比较大,所以之后尝试增大任务运行内存。再次运行，结果stage_8 还是一直卡着不动,一段时间之后任务依然失败</p>
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><p>出现数据倾斜一般可能会出现的表现有作业经常在reduce阶段完成99%后一直卡住不动，最后Reduce task因为处理的数据量巨大，导致响应超时任务被杀掉</p>
+<p>检查sql,在ods层的这张表的查询中使用到了join,因此首先检查join的连接字段。看连接字段是否有数量比较多的，或者是否有出现笛卡尔集。查看了原表发现join的字段确实有几个join的值略多一点，为了确认是否为这几个值集中分发到了某几个reduce造成数据倾斜。在join条件后将这几个数值过滤再次运行任务还是失败。所以排除是由于join造成了数据倾斜。</p>
+<p>查看spark任务日志，发现任务在stage-8失败并尝试了多次。查看任务计划发现是新增列代理键id造成的。增加代理键目的是在后其数据处理出现问题是便于溯源。</p>
+<p>卡住的任务如下：</p>
+<p><img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7ebji3qkpj31a403swgw.jpg" alt></p>
+<p>  增加代理键在hive中有两种方法:</p>
+<ul>
+<li><p>一 : 使用<code>row number over()</code></p>
+<p>此方式需要进行全局排序,所以有可能导致了数据进入同一个reduce,在数据量达到千万级别时很有可能造成内存不足</p>
+</li>
+<li><p>二 : 用UDFRowSequence生成代理键</p>
+<p>此方式需要添加hive-contrib-2.1.1.jar。此方式可以支持为更大的数据量生成代理键。</p>
+</li>
+</ul>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>更改代理键的生成方式后该job可以顺利完成。之后对活动映射逻辑进行优化。之前的hsql使用了union来连接四段hql。但是如果union all的部分个数大于2，或者每个union部分数据量大，可以考虑拆成多个insert into 语句，使用MR实际测试如下：</p>
+<p><img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7eblihaopj31a80akdnt.jpg" alt></p>
+<p>使用union方式的sql花了12分钟，使用分别insert into的sql花了8分钟。之后使用spark-sql进行了测试，时间花费区别并不大</p>
+
       
     </div>
     
@@ -371,6 +383,14 @@
     
 
     
+    <div>
+    <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+    </div>
+    
     
     
 
@@ -378,314 +398,36 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/26/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Wang Yuheng">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/26/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T12:18:19+08:00">
-                2019-09-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Hello/" itemprop="url" rel="index">
-                    <span itemprop="name">Hello</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in 
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/09/26/hello-world/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/26/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/26/Spark-Streaming整合SQL进行查询/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Wang Yuheng">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/05/26/Spark-Streaming整合SQL进行查询/" itemprop="url">Spark Streaming整合SQL进行查询</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-26T12:56:51+08:00">
-                2019-05-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spark-Streaming/" itemprop="url" rel="index">
-                    <span itemprop="name">Spark Streaming</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-          使用Spark StreamingAPI1234567891011121314151617object WordCount1 &#123;  def main(args: Array[String]): Unit = &#123;    //创建StreamingContext    val con
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/05/26/Spark-Streaming整合SQL进行查询/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -695,10 +437,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -706,6 +449,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -726,8 +473,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -787,6 +543,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据倾斜分析"><span class="nav-number">1.</span> <span class="nav-text">数据倾斜分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#任务运行失败"><span class="nav-number">1.1.</span> <span class="nav-text">任务运行失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原因分析"><span class="nav-number">1.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方法"><span class="nav-number">1.3.</span> <span class="nav-text">解决方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -928,6 +700,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
