@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Spark,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Spark启动流程分析 启动脚本分析start-master.sh12345678910111213141516171819202122232425262728293031323334353637383940414243#启动 Master 的主要 shell 流程# start-master.sh   &quot;$&amp;#123;SPARK_HOME&amp;#125;/sbin&quot;/spark-daemon.sh">
+<meta name="keywords" content="Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark启动流程源码分析">
+<meta property="og:url" content="http://yoursite.com/2019/10/11/Spark启动流程源码分析/index.html">
+<meta property="og:site_name" content="王禹衡的个人博客">
+<meta property="og:description" content="Spark启动流程分析 启动脚本分析start-master.sh12345678910111213141516171819202122232425262728293031323334353637383940414243#启动 Master 的主要 shell 流程# start-master.sh   &quot;$&amp;#123;SPARK_HOME&amp;#125;/sbin&quot;/spark-daemon.sh">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006y8mN6gy1g7wn984cguj30j509zab9.jpg">
+<meta property="og:updated_time" content="2019-10-13T10:09:20.968Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark启动流程源码分析">
+<meta name="twitter:description" content="Spark启动流程分析 启动脚本分析start-master.sh12345678910111213141516171819202122232425262728293031323334353637383940414243#启动 Master 的主要 shell 流程# start-master.sh   &quot;$&amp;#123;SPARK_HOME&amp;#125;/sbin&quot;/spark-daemon.sh">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006y8mN6gy1g7wn984cguj30j509zab9.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'WangYuheng'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/10/11/Spark启动流程源码分析/">
+
+
+
+
+
+  <title>Spark启动流程源码分析 | 王禹衡的个人博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">王禹衡的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/11/Spark启动流程源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wang Yuheng">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="王禹衡的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spark启动流程源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-11T17:30:50+08:00">
+                2019-10-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spark/" itemprop="url" rel="index">
+                    <span itemprop="name">Spark</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Spark启动流程分析"><a href="#Spark启动流程分析" class="headerlink" title="Spark启动流程分析"></a>Spark启动流程分析</h1><p><img src="https://tva1.sinaimg.cn/large/006y8mN6gy1g7wn984cguj30j509zab9.jpg" alt></p>
+<h2 id="启动脚本分析"><a href="#启动脚本分析" class="headerlink" title="启动脚本分析"></a>启动脚本分析</h2><h3 id="start-master-sh"><a href="#start-master-sh" class="headerlink" title="start-master.sh"></a>start-master.sh</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动 Master 的主要 shell 流程</span></span><br><span class="line"><span class="comment"># start-master.sh</span></span><br><span class="line">   <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>/sbin"</span>/spark-daemon.sh start <span class="variable">$CLASS</span> 1 \</span><br><span class="line">    --host <span class="variable">$SPARK_MASTER_HOST</span> --port <span class="variable">$SPARK_MASTER_PORT</span> --webui-port <span class="variable">$SPARK_MASTER_WEBUI_PORT</span> \</span><br><span class="line">    <span class="variable">$ORIGINAL_ARGS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># spark-daemon.sh  </span></span><br><span class="line">    <span class="keyword">case</span> <span class="variable">$option</span> <span class="keyword">in</span></span><br><span class="line">      (start)</span><br><span class="line">        run_command class <span class="string">"<span class="variable">$@</span>"</span></span><br><span class="line">        ;;</span><br><span class="line">    <span class="keyword">esac</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">run_command</span></span>() &#123;</span><br><span class="line">      mode=<span class="string">"<span class="variable">$1</span>"</span></span><br><span class="line">      <span class="keyword">case</span> <span class="string">"<span class="variable">$mode</span>"</span> <span class="keyword">in</span></span><br><span class="line">        (class)</span><br><span class="line">          execute_command nice -n <span class="string">"<span class="variable">$SPARK_NICENESS</span>"</span> <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>"</span>/bin/spark-class <span class="string">"<span class="variable">$command</span>"</span> <span class="string">"<span class="variable">$@</span>"</span></span><br><span class="line">          ;;</span><br><span class="line">      <span class="keyword">esac</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="title">execute_command</span></span>() &#123;</span><br><span class="line">      <span class="keyword">if</span> [ -z <span class="variable">$&#123;SPARK_NO_DAEMONIZE+set&#125;</span> ]; <span class="keyword">then</span></span><br><span class="line">          <span class="comment"># 最终以后台守护进程的方式启动 Master</span></span><br><span class="line">          nohup -- <span class="string">"<span class="variable">$@</span>"</span> &gt;&gt; <span class="variable">$log</span> 2&gt;&amp;1 &lt; /dev/null &amp;</span><br><span class="line">      <span class="keyword">fi</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动类: </span></span><br><span class="line">    /opt/module/spark-standalone/bin/spark-class org.apache.spark.deploy.master.Master </span><br><span class="line">            --host hadoop101 </span><br><span class="line">            --port 7077 </span><br><span class="line">            --webui-port 8080</span><br><span class="line"></span><br><span class="line"><span class="comment"># bin/spark-class</span></span><br><span class="line"><span class="comment">#启动命令:</span></span><br><span class="line">    /opt/module/jdk1.8.0_172/bin/java </span><br><span class="line">        -cp /opt/module/spark-standalone/conf/:/opt/module/spark-standalone/jars/* </span><br><span class="line">        -Xmx1g org.apache.spark.deploy.master.Master </span><br><span class="line">        --host hadoop101 </span><br><span class="line">        --port 7077 </span><br><span class="line">        --webui-port 8080</span><br></pre></td></tr></table></figure>
+
+<h3 id="start-slaves-sh"><a href="#start-slaves-sh" class="headerlink" title="start-slaves.sh"></a>start-slaves.sh</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 Worker 的主要 shell 流程</span></span><br><span class="line"><span class="comment"># start-slaves.sh</span></span><br><span class="line">    <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>/sbin/slaves.sh"</span> <span class="built_in">cd</span> <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>"</span> \; <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>/sbin/start-slave.sh"</span> <span class="string">"spark://<span class="variable">$SPARK_MASTER_HOST</span>:<span class="variable">$SPARK_MASTER_PORT</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># start-slave.sh</span></span><br><span class="line">    <span class="comment"># worker类</span></span><br><span class="line">    CLASS=<span class="string">"org.apache.spark.deploy.worker.Worker"</span></span><br><span class="line">    <span class="keyword">if</span> [ <span class="string">"<span class="variable">$SPARK_WORKER_WEBUI_PORT</span>"</span> = <span class="string">""</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="comment"># worker webui 端口号</span></span><br><span class="line">        SPARK_WORKER_WEBUI_PORT=8081   </span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> [ <span class="string">"<span class="variable">$SPARK_WORKER_INSTANCES</span>"</span> = <span class="string">""</span> ]; <span class="keyword">then</span></span><br><span class="line">      start_instance 1 <span class="string">"<span class="variable">$@</span>"</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="comment"># 启动worker实例  spark-daemon.sh在启动Master的时候已经使用过一次了</span></span><br><span class="line">    <span class="keyword">function</span> start_instance &#123;</span><br><span class="line">      <span class="string">"<span class="variable">$&#123;SPARK_HOME&#125;</span>/sbin"</span>/spark-daemon.sh start <span class="variable">$CLASS</span> <span class="variable">$WORKER_NUM</span> \</span><br><span class="line">         --webui-port <span class="string">"<span class="variable">$WEBUI_PORT</span>"</span> <span class="variable">$PORT_FLAG</span> <span class="variable">$PORT_NUM</span> <span class="variable">$MASTER</span> <span class="string">"<span class="variable">$@</span>"</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最终启动类:</span></span><br><span class="line">    /opt/module/spark-standalone/bin/spark-class org.apache.spark.deploy.worker.Worker </span><br><span class="line">            --webui-port 8081 </span><br><span class="line">            spark://hadoop101:7077</span><br><span class="line"></span><br><span class="line"><span class="comment"># bin/spark-class</span></span><br><span class="line">    <span class="comment"># 启动命令:</span></span><br><span class="line">    opt/module/jdk1.8.0_172/bin/java </span><br><span class="line">        -cp /opt/module/spark-standalone/conf/:/opt/module/spark-standalone/jars/* </span><br><span class="line">        -Xmx1g org.apache.spark.deploy.worker.Worker </span><br><span class="line">        --webui-port 8081 </span><br><span class="line">        spark://hadoop101:7077</span><br></pre></td></tr></table></figure>
+
+<h2 id="Master启动源码分析"><a href="#Master启动源码分析" class="headerlink" title="Master启动源码分析"></a>Master启动源码分析</h2><p>Master启动就会准备接受Worker的注册,然后开启子线程去检查worker的心跳是否超时</p>
+<p>进入启动脚本中的<code>org.apache.spark.deploy.master.Master</code>查看源码</p>
+<h3 id="Master伴生对象"><a href="#Master伴生对象" class="headerlink" title="Master伴生对象"></a>Master伴生对象</h3><p>启动Master的入口为Master伴生对象的main方法</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[deploy] <span class="class"><span class="keyword">object</span> <span class="title">Master</span> <span class="keyword">extends</span> <span class="title">Logging</span> </span>&#123;</span><br><span class="line">    <span class="keyword">val</span> <span class="type">SYSTEM_NAME</span> = <span class="string">"sparkMaster"</span></span><br><span class="line">    <span class="keyword">val</span> <span class="type">ENDPOINT_NAME</span> = <span class="string">"Master"</span></span><br><span class="line">    <span class="comment">// 启动 Master 的入口函数</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(argStrings: <span class="type">Array</span>[<span class="type">String</span>]) &#123;</span><br><span class="line">        <span class="type">Utils</span>.initDaemon(log)</span><br><span class="line">        <span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span></span><br><span class="line">        <span class="comment">// 构建用于参数解析的实例   --host hadoop101 --port 7077 --webui-port 8080</span></span><br><span class="line">        <span class="keyword">val</span> args = <span class="keyword">new</span> <span class="type">MasterArguments</span>(argStrings, conf)</span><br><span class="line">        <span class="comment">// 启动 RPC 通信环境和 MasterEndPoint(通信终端)</span></span><br><span class="line">        <span class="keyword">val</span> (rpcEnv, _, _) = startRpcEnvAndEndpoint(args.host, args.port, args.webUiPort, conf)</span><br><span class="line">        rpcEnv.awaitTermination()</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>startRpcEnvAndEndpoint方法</li>
+</ul>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">      * Start the Master and return a three tuple of:</span></span><br><span class="line"><span class="comment">      * 启动 Master 并返回一个三元组</span></span><br><span class="line"><span class="comment">      * (1) The Master RpcEnv</span></span><br><span class="line"><span class="comment">      * (2) The web UI bound port</span></span><br><span class="line"><span class="comment">      * (3) The REST server bound port, if any</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">startRpcEnvAndEndpoint</span></span>(</span><br><span class="line">                                  host: <span class="type">String</span>,</span><br><span class="line">                                  port: <span class="type">Int</span>,</span><br><span class="line">                                  webUiPort: <span class="type">Int</span>,</span><br><span class="line">                                  conf: <span class="type">SparkConf</span>): (<span class="type">RpcEnv</span>, <span class="type">Int</span>, <span class="type">Option</span>[<span class="type">Int</span>]) = &#123;</span><br><span class="line">        <span class="keyword">val</span> securityMgr = <span class="keyword">new</span> <span class="type">SecurityManager</span>(conf)</span><br><span class="line">        <span class="comment">// 创建 Master 端的 RpcEnv 环境   参数: sparkMaster hadoop101 7077 conf securityMgr</span></span><br><span class="line">        <span class="comment">// 实际类型是: NettyRpcEnv</span></span><br><span class="line">        <span class="keyword">val</span> rpcEnv: <span class="type">RpcEnv</span> = <span class="type">RpcEnv</span>.create(<span class="type">SYSTEM_NAME</span>, host, port, conf, securityMgr)</span><br><span class="line">        <span class="comment">// 创建 Master对象, 该对象就是一个RpcEndpoint, 在RpcEnv中注册这个RpcEndpoint</span></span><br><span class="line">        <span class="comment">// 返回该 RpcEndpoint 的引用, 使用该引用来接收信息和发送信息</span></span><br><span class="line">        <span class="keyword">val</span> masterEndpoint: <span class="type">RpcEndpointRef</span> = rpcEnv.setupEndpoint(<span class="type">ENDPOINT_NAME</span>,</span><br><span class="line">            <span class="keyword">new</span> <span class="type">Master</span>(rpcEnv, rpcEnv.address, webUiPort, securityMgr, conf))</span><br><span class="line">        <span class="comment">// 向 Master 的通信终端发送请求，获取BoundPortsResponse 对象</span></span><br><span class="line">        <span class="comment">// BoundPortsResponse 是一个样例类包含三个属性: rpcEndpointPort webUIPort restPort</span></span><br><span class="line">      	<span class="comment">// masterEndpoint.askWithRetry发出的信息将会被Master的receiveAndReply接收,并作出响应</span></span><br><span class="line">        <span class="keyword">val</span> portsResponse: <span class="type">BoundPortsResponse</span> = masterEndpoint.askWithRetry[<span class="type">BoundPortsResponse</span>](<span class="type">BoundPortsRequest</span>)</span><br><span class="line">        (rpcEnv, portsResponse.webUIPort, portsResponse.restPort)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="RpcEnv的创建"><a href="#RpcEnv的创建" class="headerlink" title="RpcEnv的创建"></a>RpcEnv的创建</h3><p>进入上面的<code>RpcEnv.create</code>的方法,真正的创建是调用<code>NettyRpcEnvFactory</code>的<code>create</code>方法创建的</p>
+<p>创建<code>NettyRpcEnv</code>的时候,会创建消息分发器,收件箱和存储远程地址与发件箱的Map集合</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create</span></span>(</span><br><span class="line">              name: <span class="type">String</span>,</span><br><span class="line">              bindAddress: <span class="type">String</span>,</span><br><span class="line">              advertiseAddress: <span class="type">String</span>,</span><br><span class="line">              port: <span class="type">Int</span>,</span><br><span class="line">              conf: <span class="type">SparkConf</span>,</span><br><span class="line">              securityManager: <span class="type">SecurityManager</span>,</span><br><span class="line">              clientMode: <span class="type">Boolean</span>): <span class="type">RpcEnv</span> = &#123;</span><br><span class="line">    <span class="comment">// 保存 RpcEnv 的配置信息</span></span><br><span class="line">    <span class="keyword">val</span> config = <span class="type">RpcEnvConfig</span>(conf, name, bindAddress, advertiseAddress, port, securityManager,</span><br><span class="line">        clientMode)</span><br><span class="line">    <span class="comment">// 创建 NettyRpcEvn</span></span><br><span class="line">    <span class="keyword">new</span> <span class="type">NettyRpcEnvFactory</span>().create(config)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进入<code>new NettyRpcEnvFactory().create(config)</code>方法,创建RpcEnv</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>[rpc] <span class="class"><span class="keyword">class</span> <span class="title">NettyRpcEnvFactory</span> <span class="keyword">extends</span> <span class="title">RpcEnvFactory</span> <span class="keyword">with</span> <span class="title">Logging</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">create</span></span>(config: <span class="type">RpcEnvConfig</span>): <span class="type">RpcEnv</span> = &#123;</span><br><span class="line">        <span class="keyword">val</span> sparkConf = config.conf</span><br><span class="line">        <span class="comment">// Use JavaSerializerInstance in multiple threads is safe. However, if we plan to support</span></span><br><span class="line">        <span class="comment">// KryoSerializer in future, we have to use ThreadLocal to store SerializerInstance</span></span><br><span class="line">        <span class="comment">// 用于 Rpc传输对象时的序列化</span></span><br><span class="line">        <span class="keyword">val</span> javaSerializerInstance: <span class="type">JavaSerializerInstance</span> = <span class="keyword">new</span> <span class="type">JavaSerializer</span>(sparkConf)</span><br><span class="line">            .newInstance()</span><br><span class="line">            .asInstanceOf[<span class="type">JavaSerializerInstance</span>]</span><br><span class="line">        <span class="comment">// 实例化 NettyRpcEnv</span></span><br><span class="line">        <span class="keyword">val</span> nettyEnv = <span class="keyword">new</span> <span class="type">NettyRpcEnv</span>(</span><br><span class="line">            sparkConf,</span><br><span class="line">            javaSerializerInstance,</span><br><span class="line">            config.advertiseAddress,</span><br><span class="line">            config.securityManager)</span><br><span class="line">        <span class="keyword">if</span> (!config.clientMode) &#123;</span><br><span class="line">            <span class="comment">// 定义 NettyRpcEnv 的启动函数</span></span><br><span class="line">            <span class="keyword">val</span> startNettyRpcEnv: <span class="type">Int</span> =&gt; (<span class="type">NettyRpcEnv</span>, <span class="type">Int</span>) = &#123; actualPort =&gt;</span><br><span class="line">                nettyEnv.startServer(config.bindAddress, actualPort)</span><br><span class="line">                (nettyEnv, nettyEnv.address.port)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 启动 NettyRpcEnv</span></span><br><span class="line">                <span class="type">Utils</span>.startServiceOnPort(config.port, startNettyRpcEnv, sparkConf, config.name)._1</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">                    nettyEnv.shutdown()</span><br><span class="line">                    <span class="keyword">throw</span> e</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        nettyEnv</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建Dispatcher"><a href="#创建Dispatcher" class="headerlink" title="创建Dispatcher"></a>创建Dispatcher</h4><p>上一个步骤中实例化<code>NettyRpcEnv</code>时就会创建消息分发器</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建消息分发器</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> dispatcher: <span class="type">Dispatcher</span> = <span class="keyword">new</span> <span class="type">Dispatcher</span>(<span class="keyword">this</span>)</span><br></pre></td></tr></table></figure>
+
+<p>创建Dispatcher时,会通过线程池创建新的线程来分发消息,而这一过程中就会实例化<code>MessageLoop</code></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Thread pool used for dispatching messages. */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">val</span> threadpool: <span class="type">ThreadPoolExecutor</span> = &#123;</span><br><span class="line">  <span class="keyword">val</span> numThreads = nettyEnv.conf.getInt(<span class="string">"spark.rpc.netty.dispatcher.numThreads"</span>,</span><br><span class="line">    math.max(<span class="number">2</span>, <span class="type">Runtime</span>.getRuntime.availableProcessors()))</span><br><span class="line">  <span class="keyword">val</span> pool = <span class="type">ThreadUtils</span>.newDaemonFixedThreadPool(numThreads, <span class="string">"dispatcher-event-loop"</span>)</span><br><span class="line">  <span class="keyword">for</span> (i &lt;- <span class="number">0</span> until numThreads) &#123;</span><br><span class="line">    pool.execute(<span class="keyword">new</span> <span class="type">MessageLoop</span>) <span class="comment">//实例化MessageLoop</span></span><br><span class="line">  &#125;</span><br><span class="line">  pool</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>MessageLoop</code>是<code>Dispatcher</code>的一个内部类</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageLoop</span> <span class="keyword">extends</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">  <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//RpcEndpoint未注册时会阻塞</span></span><br><span class="line">          <span class="keyword">val</span> data = receivers.take()	<span class="comment">//其中调用了lock方法</span></span><br><span class="line">          <span class="keyword">if</span> (data == <span class="type">PoisonPill</span>) &#123;</span><br><span class="line">            <span class="comment">// Put PoisonPill back so that other MessageLoops can see it.</span></span><br><span class="line">            receivers.offer(<span class="type">PoisonPill</span>)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">          &#125;</span><br><span class="line">          data.inbox.process(<span class="type">Dispatcher</span>.<span class="keyword">this</span>)</span><br><span class="line">        &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">          <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt; logError(e.getMessage, e)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> ie: <span class="type">InterruptedException</span> =&gt; <span class="comment">// exit</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注册endpoint"><a href="#注册endpoint" class="headerlink" title="注册endpoint"></a>注册endpoint</h3><p><code>rpcEnv.setupEndpoint</code>最终调用的是<code>NettyRpcEnv</code>的<code>setupEndpoint</code>方法</p>
+<p>其中执行了==<code>dispatcher.registerRpcEndpoint(name, endpoint)</code>==</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">registerRpcEndpoint</span></span>(name: <span class="type">String</span>, endpoint: <span class="type">RpcEndpoint</span>): <span class="type">NettyRpcEndpointRef</span> = &#123;</span><br><span class="line">    <span class="keyword">val</span> addr = <span class="type">RpcEndpointAddress</span>(nettyEnv.address, name)</span><br><span class="line">    <span class="keyword">val</span> endpointRef = <span class="keyword">new</span> <span class="type">NettyRpcEndpointRef</span>(nettyEnv.conf, addr, nettyEnv)</span><br><span class="line">    synchronized &#123;</span><br><span class="line">      <span class="keyword">if</span> (stopped) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">"RpcEnv has been stopped"</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//注册endpoint,有两个参数:端点名称和端点数据包类型</span></span><br><span class="line">      <span class="comment">//endpoints为一个Map,向其中添加了下面的元素</span></span><br><span class="line">      <span class="keyword">if</span> (endpoints.putIfAbsent(name, <span class="keyword">new</span> <span class="type">EndpointData</span>(name, endpoint, endpointRef)) != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalArgumentException</span>(<span class="string">s"There is already an RpcEndpoint called <span class="subst">$name</span>"</span>)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//获取端点数据,这个name是传入的Master</span></span><br><span class="line">      <span class="comment">//即从endpoints这个Map中取出name对应的value值</span></span><br><span class="line">      <span class="keyword">val</span> data = endpoints.get(name)</span><br><span class="line">      <span class="comment">//向端点引用Map中添加该端点</span></span><br><span class="line">      endpointRefs.put(data.endpoint, data.ref)</span><br><span class="line">      <span class="comment">//receivers为一个队列,调用offer方法将data存入</span></span><br><span class="line">      <span class="comment">//向Dispatcher发送一条信息(这是Dispatcher接收到的第一条信息,是onStart信息)</span></span><br><span class="line">      receivers.offer(data)  <span class="comment">// for the OnStart message</span></span><br><span class="line">    &#125;</span><br><span class="line">    endpointRef</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加onStart信息"><a href="#添加onStart信息" class="headerlink" title="添加onStart信息"></a>添加onStart信息</h4><p>在注册endpoint时,有<code>new EndpointData()</code>会创建Endpoint的Inbox对象,而Inbox初始化完成后,会向InBox的messages中添加一个OnStart信息,到此时已经完成了onStart消息的存储,那么何时会处理这个消息呢?</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// OnStart should be the first message to process</span></span><br><span class="line">inbox.synchronized &#123;</span><br><span class="line">    messages.add(<span class="type">OnStart</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="调用Master生命周期的onStart方法"><a href="#调用Master生命周期的onStart方法" class="headerlink" title="调用Master生命周期的onStart方法"></a>调用Master生命周期的onStart方法</h4><p>在注册过程中,RpcEndpoint是以name和EndpointData的形式存储在Dispatcher中的</p>
+<p>注意 : Dispather的创建是在注册RpcEndPoint之前的创建RpcEnv的步骤中，当我们在创建Dispather时候就已经启动了MessageLoop，而此时由于Dispather没有注册RpcEndPoint所以此时阻塞在<code>val data = receivers.take()</code>(receivers是一个LinkedBlockingQueue)这一行，直到有RpcEndPoint注册之后才会真正执行消息处理。这里面最后Inbox的process方法完成消息处理</p>
+<p>当RpcEndpoint向Dispatcher注册时,<code>MessageLoop</code>中的<code>receivers.take()</code>就不再阻塞了,继续向下执行,我们进入<code>data.inbox.process(Dispatcher.this)</code>方法</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//进入inbox.process方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process</span></span>(dispatcher: <span class="type">Dispatcher</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">       <span class="keyword">var</span> message: <span class="type">InboxMessage</span> = <span class="literal">null</span></span><br><span class="line">       inbox.synchronized &#123;</span><br><span class="line">           <span class="keyword">if</span> (!enableConcurrent &amp;&amp; numActiveThreads != <span class="number">0</span>) &#123;</span><br><span class="line">               <span class="keyword">return</span></span><br><span class="line">           &#125;</span><br><span class="line">           message = messages.poll()</span><br><span class="line">           <span class="keyword">if</span> (message != <span class="literal">null</span>) &#123;</span><br><span class="line">               numActiveThreads += <span class="number">1</span></span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">return</span></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">			<span class="comment">//死循环来处理不同内容的消息</span></span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           safelyCall(endpoint) &#123;</span><br><span class="line">               message <span class="keyword">match</span> &#123;</span><br><span class="line">                   <span class="keyword">case</span> <span class="type">RpcMessage</span>(_sender, content, context) =&gt;</span><br><span class="line">                       <span class="keyword">try</span> &#123;</span><br><span class="line">                           endpoint.receiveAndReply(context).applyOrElse[<span class="type">Any</span>, <span class="type">Unit</span>](content, &#123; msg =&gt;</span><br><span class="line">                               <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">SparkException</span>(<span class="string">s"Unsupported message <span class="subst">$message</span> from <span class="subst">$&#123;_sender&#125;</span>"</span>)</span><br><span class="line">                           &#125;)</span><br><span class="line">                       &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                           <span class="keyword">case</span> <span class="type">NonFatal</span>(e) =&gt;</span><br><span class="line">                               context.sendFailure(e)</span><br><span class="line">                               <span class="comment">// Throw the exception -- this exception will be caught by the safelyCall function.</span></span><br><span class="line">                               <span class="comment">// The endpoint's onError function will be called.</span></span><br><span class="line">                               <span class="keyword">throw</span> e</span><br><span class="line">                       &#125;</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">OneWayMessage</span>(_sender, content) =&gt;</span><br><span class="line">                       endpoint.receive.applyOrElse[<span class="type">Any</span>, <span class="type">Unit</span>](content, &#123; msg =&gt;</span><br><span class="line">                           <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">SparkException</span>(<span class="string">s"Unsupported message <span class="subst">$message</span> from <span class="subst">$&#123;_sender&#125;</span>"</span>)</span><br><span class="line">                       &#125;)</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">OnStart</span> =&gt;</span><br><span class="line">                       endpoint.onStart()</span><br><span class="line">                       <span class="keyword">if</span> (!endpoint.isInstanceOf[<span class="type">ThreadSafeRpcEndpoint</span>]) &#123;</span><br><span class="line">                           inbox.synchronized &#123;</span><br><span class="line">                               <span class="keyword">if</span> (!stopped) &#123;</span><br><span class="line">                                   enableConcurrent = <span class="literal">true</span></span><br><span class="line">                               &#125;</span><br><span class="line">                           &#125;</span><br><span class="line">                       &#125;</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">OnStop</span> =&gt;</span><br><span class="line">                       <span class="keyword">val</span> activeThreads = inbox.synchronized &#123;</span><br><span class="line">                           inbox.numActiveThreads</span><br><span class="line">                       &#125;</span><br><span class="line">                       assert(activeThreads == <span class="number">1</span>,</span><br><span class="line">                           <span class="string">s"There should be only a single active thread but found <span class="subst">$activeThreads</span> threads."</span>)</span><br><span class="line">                       dispatcher.removeRpcEndpointRef(endpoint)</span><br><span class="line">                       endpoint.onStop()</span><br><span class="line">                       assert(isEmpty, <span class="string">"OnStop should be the last message"</span>)</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">RemoteProcessConnected</span>(remoteAddress) =&gt;</span><br><span class="line">                       endpoint.onConnected(remoteAddress)</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">RemoteProcessDisconnected</span>(remoteAddress) =&gt;</span><br><span class="line">                       endpoint.onDisconnected(remoteAddress)</span><br><span class="line">                   </span><br><span class="line">                   <span class="keyword">case</span> <span class="type">RemoteProcessConnectionError</span>(cause, remoteAddress) =&gt;</span><br><span class="line">                       endpoint.onNetworkError(cause, remoteAddress)</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">           ...</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到,case到OnStart,就会调用<code>endpoint.onStart()</code>方法,这个endpoint就是在<code>new Inbox(ref, endpoint)</code>传入的,也就是在<code>new EndpointData时传入的</code>,即是<code>registerRpcEndpoint()</code>方法的参数,其实就是Master伴生对象main方法传入的Master对象,所以这里就会执行Master伴生类的onStart方法了,它的生命周期就是这样实现的</p>
+<h3 id="Master伴生类-Master的RpcEndpoint启动"><a href="#Master伴生类-Master的RpcEndpoint启动" class="headerlink" title="Master伴生类(Master的RpcEndpoint启动)"></a>Master伴生类(Master的RpcEndpoint启动)</h3><p>Master是一个RpcEndpoint,Master伴生类的生命周期:</p>
+<p>Constructor –&gt; onstart –&gt; receive* –&gt; onStop</p>
+<h4 id="onStart"><a href="#onStart" class="headerlink" title="onStart()"></a>onStart()</h4><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建 WebUI 服务器</span></span><br><span class="line">webUi = <span class="keyword">new</span> <span class="type">MasterWebUI</span>(<span class="keyword">this</span>, webUiPort)</span><br><span class="line"><span class="comment">// 按照固定的频率去启动线程来检查 Worker 是否超时. 其实就是给自己发信息: CheckForWorkerTimeOut</span></span><br><span class="line"><span class="comment">// 默认频率是WORKER_TIMEOUT_MS即每分钟检查一次.</span></span><br><span class="line">checkForWorkerTimeOutTask = forwardMessageThread.scheduleAtFixedRate(<span class="keyword">new</span> <span class="type">Runnable</span> &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(): <span class="type">Unit</span> = <span class="type">Utils</span>.tryLogNonFatalError &#123;</span><br><span class="line">      	<span class="comment">//receive方法就是Spark开启子线程去不断的接收收件箱的信息的线程调用的方法</span></span><br><span class="line">        <span class="comment">//self就是RpcEndpointRef,给自己发信息,就会在receive方法中对 CheckForWorkerTimeOut 进行处理</span></span><br><span class="line">        self.send(<span class="type">CheckForWorkerTimeOut</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, <span class="number">0</span>, <span class="type">WORKER_TIMEOUT_MS</span>, <span class="type">TimeUnit</span>.<span class="type">MILLISECONDS</span>)</span><br></pre></td></tr></table></figure>
+
+<p>进入<code>receive</code>方法,通过case找到CheckForWorkerTimeOut,进入下面的方法</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Check for, and remove, any timed-out workers */</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">timeOutDeadWorkers</span></span>() &#123;</span><br><span class="line">    <span class="comment">// 拿到当前时间</span></span><br><span class="line">    <span class="keyword">val</span> currentTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    <span class="comment">// 把超时的 Worker 从 Workers(存储了所有注册的Worker) 中移除</span></span><br><span class="line">    <span class="keyword">val</span> toRemove = workers.filter(_.lastHeartbeat &lt; currentTime - <span class="type">WORKER_TIMEOUT_MS</span>).toArray</span><br><span class="line">    <span class="keyword">for</span> (worker &lt;- toRemove) &#123;</span><br><span class="line">      	<span class="comment">//判断worker的状态是否为DEAD</span></span><br><span class="line">        <span class="keyword">if</span> (worker.state != <span class="type">WorkerState</span>.<span class="type">DEAD</span>) &#123;</span><br><span class="line">            logWarning(<span class="string">"Removing %s because we got no heartbeat in %d seconds"</span>.format(</span><br><span class="line">                worker.id, <span class="type">WORKER_TIMEOUT_MS</span> / <span class="number">1000</span>))</span><br><span class="line">            removeWorker(worker)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (worker.lastHeartbeat &lt; currentTime - ((<span class="type">REAPER_ITERATIONS</span> + <span class="number">1</span>) * <span class="type">WORKER_TIMEOUT_MS</span>)) &#123;</span><br><span class="line">                workers -= worker <span class="comment">// we've seen this DEAD worker in the UI, etc. for long enough; cull it</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Worker启动源码分析"><a href="#Worker启动源码分析" class="headerlink" title="Worker启动源码分析"></a>Worker启动源码分析</h2><h3 id="Worker伴生类"><a href="#Worker伴生类" class="headerlink" title="Worker伴生类"></a>Worker伴生类</h3><p>onStart()方法</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">onStart</span></span>() &#123;</span><br><span class="line">    <span class="comment">// 第一次启动断言 Worker 未注册</span></span><br><span class="line">    assert(!registered)</span><br><span class="line">    <span class="comment">// 创建工作目录</span></span><br><span class="line">    createWorkDir()</span><br><span class="line">    <span class="comment">// 启动 shuffle 服务</span></span><br><span class="line">    shuffleService.startIfEnabled()</span><br><span class="line">    <span class="comment">// Worker的 WebUI</span></span><br><span class="line">    webUi = <span class="keyword">new</span> <span class="type">WorkerWebUI</span>(<span class="keyword">this</span>, workDir, webUiPort)</span><br><span class="line">    webUi.bind()</span><br><span class="line">    workerWebUiUrl = <span class="string">s"http://<span class="subst">$publicAddress</span>:<span class="subst">$&#123;webUi.boundPort&#125;</span>"</span></span><br><span class="line">    <span class="comment">// 向 Master 注册 Worker</span></span><br><span class="line">    registerWithMaster()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Worker向Master注册"><a href="#Worker向Master注册" class="headerlink" title="Worker向Master注册"></a>Worker向Master注册</h3><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//进入registerWithMaster(),关键代码 : 向所有的Master注册</span></span><br><span class="line">registerMasterFutures = tryRegisterAllMasters()</span><br></pre></td></tr></table></figure>
+
+<p>tryRegisterAllMasters()</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">tryRegisterAllMasters</span></span>(): <span class="type">Array</span>[<span class="type">JFuture</span>[_]] = &#123;</span><br><span class="line">    masterRpcAddresses.map &#123; masterAddress =&gt;</span><br><span class="line">        <span class="comment">// 从线程池中启动线程来执行 Worker 向 Master 注册</span></span><br><span class="line">        registerMasterThreadPool.submit(<span class="keyword">new</span> <span class="type">Runnable</span> &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 根据 Master的地址得到一个Master的RpcEndpointRef, 然后就可以和Master进行通讯了.</span></span><br><span class="line">                    <span class="keyword">val</span> masterEndpoint = rpcEnv.setupEndpointRef(masterAddress, <span class="type">Master</span>.<span class="type">ENDPOINT_NAME</span>)</span><br><span class="line">                    <span class="comment">// 向 Master 注册</span></span><br><span class="line">                    registerWithMaster(masterEndpoint)</span><br><span class="line">                &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>registerWithMaster</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">def</span> <span class="title">registerWithMaster</span></span>(masterEndpoint: <span class="type">RpcEndpointRef</span>): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// 向 Master 对应的 receiveAndReply 方法发送信息</span></span><br><span class="line">    <span class="comment">// 信息的类型是 RegisterWorker, 包括 Worker 的一些信息: id, 主机地址, 端口号, 内存, webUi</span></span><br><span class="line">    masterEndpoint.ask[<span class="type">RegisterWorkerResponse</span>](<span class="type">RegisterWorker</span>(</span><br><span class="line">        workerId, host, port, self, cores, memory, workerWebUiUrl))</span><br><span class="line">        .onComplete &#123;</span><br><span class="line">            <span class="comment">// This is a very fast action so we can use "ThreadUtils.sameThread"</span></span><br><span class="line">            <span class="comment">// 注册成功</span></span><br><span class="line">            <span class="keyword">case</span> <span class="type">Success</span>(msg) =&gt;</span><br><span class="line">                <span class="type">Utils</span>.tryLogNonFatalError &#123;</span><br><span class="line">                    handleRegisterResponse(msg)</span><br><span class="line">                &#125;</span><br><span class="line">            <span class="comment">// 注册失败</span></span><br><span class="line">            <span class="keyword">case</span> <span class="type">Failure</span>(e) =&gt;</span><br><span class="line">                logError(<span class="string">s"Cannot register with master: <span class="subst">$&#123;masterEndpoint.address&#125;</span>"</span>, e)</span><br><span class="line">                <span class="type">System</span>.exit(<span class="number">1</span>)</span><br><span class="line">        &#125;(<span class="type">ThreadUtils</span>.sameThread)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上一步会向Master发信息,Master的<code>receiveAndReply</code>方法来处理这个信息</p>
+<p>Master的<code>receiveAndReply</code></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 处理 Worker 的注册信息</span></span><br><span class="line"><span class="keyword">case</span> <span class="type">RegisterWorker</span>(</span><br><span class="line">id, workerHost, workerPort, workerRef, cores, memory, workerWebUiUrl) =&gt;</span><br><span class="line">    <span class="keyword">if</span> (state == <span class="type">RecoveryState</span>.<span class="type">STANDBY</span>) &#123;</span><br><span class="line">        <span class="comment">// 给发送者回应消息.  对方的 receive 方法会收到这个信息</span></span><br><span class="line">        context.reply(<span class="type">MasterInStandby</span>)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (idToWorker.contains(id)) &#123; <span class="comment">// 如果要注册的 Worker 已经存在</span></span><br><span class="line">        context.reply(<span class="type">RegisterWorkerFailed</span>(<span class="string">"Duplicate worker ID"</span>))</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 根据传来的信息封装 WorkerInfo</span></span><br><span class="line">        <span class="keyword">val</span> worker = <span class="keyword">new</span> <span class="type">WorkerInfo</span>(id, workerHost, workerPort, cores, memory,</span><br><span class="line">            workerRef, workerWebUiUrl)</span><br><span class="line">        <span class="keyword">if</span> (registerWorker(worker)) &#123;  <span class="comment">// 注册成功</span></span><br><span class="line">            persistenceEngine.addWorker(worker)</span><br><span class="line">            <span class="comment">// 响应信息</span></span><br><span class="line">            context.reply(<span class="type">RegisteredWorker</span>(self, masterWebUiUrl))</span><br><span class="line">            schedule()</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">val</span> workerAddress = worker.endpoint.address</span><br><span class="line">            context.reply(<span class="type">RegisterWorkerFailed</span>(<span class="string">"Attempted to re-register worker at same address: "</span></span><br><span class="line">                + workerAddress))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Worker的<code>handleRegisterResponse</code></p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="type">RegisteredWorker</span>(masterRef, masterWebUiUrl) =&gt;</span><br><span class="line">    logInfo(<span class="string">"Successfully registered with master "</span> + masterRef.address.toSparkURL)</span><br><span class="line">    <span class="comment">// 已经注册过了</span></span><br><span class="line">    registered = <span class="literal">true</span></span><br><span class="line">    <span class="comment">// 更新 Master</span></span><br><span class="line">    changeMaster(masterRef, masterWebUiUrl)</span><br><span class="line">    <span class="comment">// 通知自己给 Master 发送心跳信息  默认 1 分钟 4 次</span></span><br><span class="line">    forwordMessageScheduler.scheduleAtFixedRate(<span class="keyword">new</span> <span class="type">Runnable</span> &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">run</span></span>(): <span class="type">Unit</span> = <span class="type">Utils</span>.tryLogNonFatalError &#123;</span><br><span class="line">            self.send(<span class="type">SendHeartbeat</span>)	<span class="comment">//Worker发给自己,通过自己的receive方法来处理</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, <span class="number">0</span>, <span class="type">HEARTBEAT_MILLIS</span>, <span class="type">TimeUnit</span>.<span class="type">MILLISECONDS</span>)</span><br></pre></td></tr></table></figure>
+
+<p>Worker的receive</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="type">SendHeartbeat</span> =&gt;</span><br><span class="line">    <span class="keyword">if</span> (connected) &#123;</span><br><span class="line">        <span class="comment">// 给 Master 发送心跳</span></span><br><span class="line">        sendToMaster(<span class="type">Heartbeat</span>(workerId, self))</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>Master的receive</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="type">Heartbeat</span>(workerId, worker) =&gt;</span><br><span class="line">    idToWorker.get(workerId) <span class="keyword">match</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">Some</span>(workerInfo) =&gt;</span><br><span class="line">            <span class="comment">// 记录该 Worker 的最新心跳</span></span><br><span class="line">            workerInfo.lastHeartbeat = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+    <div>
+    <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+    </div>
+    
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/26/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Wang Yuheng</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark启动流程分析"><span class="nav-number">1.</span> <span class="nav-text">Spark启动流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动脚本分析"><span class="nav-number">1.1.</span> <span class="nav-text">启动脚本分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#start-master-sh"><span class="nav-number">1.1.1.</span> <span class="nav-text">start-master.sh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-slaves-sh"><span class="nav-number">1.1.2.</span> <span class="nav-text">start-slaves.sh</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master启动源码分析"><span class="nav-number">1.2.</span> <span class="nav-text">Master启动源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master伴生对象"><span class="nav-number">1.2.1.</span> <span class="nav-text">Master伴生对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcEnv的创建"><span class="nav-number">1.2.2.</span> <span class="nav-text">RpcEnv的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建Dispatcher"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">创建Dispatcher</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册endpoint"><span class="nav-number">1.2.3.</span> <span class="nav-text">注册endpoint</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#添加onStart信息"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">添加onStart信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#调用Master生命周期的onStart方法"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">调用Master生命周期的onStart方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Master伴生类-Master的RpcEndpoint启动"><span class="nav-number">1.2.4.</span> <span class="nav-text">Master伴生类(Master的RpcEndpoint启动)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#onStart"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">onStart()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker启动源码分析"><span class="nav-number">1.3.</span> <span class="nav-text">Worker启动源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker伴生类"><span class="nav-number">1.3.1.</span> <span class="nav-text">Worker伴生类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker向Master注册"><span class="nav-number">1.3.2.</span> <span class="nav-text">Worker向Master注册</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wang Yuheng</span>
+
+  
+</div>
+
+<!-- 
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+-->
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
